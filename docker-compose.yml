@@ -1,0 +1,68 @@
+version: "3"
+
+networks:
+    backend:
+        driver: bridge
+
+volumes:
+    mysql-database:
+        driver: local
+    mailcatcher-data:
+        driver: local
+
+    ### ignore folder volume #####
+    var:
+        driver: local
+    vendor:
+        driver: local
+
+services:
+
+    web:
+        container_name: web_1
+        build:
+            context: .
+        ports:
+            - 8080:80
+            - 4430:443
+        volumes:
+            - ".:/var/www/"
+            - "var:/var/www/var"
+            - "vendor:/var/www/data/vendor"
+        networks:
+            - backend
+
+    mysql:
+        container_name: mysql_1
+        image: mysql:5.7
+        environment:
+            MYSQL_ROOT_PASSWORD: root
+            MYSQL_DATABASE: eccubedb
+            MYSQL_USER: dbuser
+            MYSQL_PASSWORD: secret
+        volumes:
+            - mysql-database:/var/lib/mysql
+        ports:
+            - 13306:3306
+        networks:
+            - backend
+
+    phpmyadmin:
+        container_name: pma_1
+        image: phpmyadmin/phpmyadmin
+        links:
+            - mysql
+        ports:
+            - 9080:80
+        networks:
+            - backend
+        environment:
+            - PMA_HOST=mysql
+
+    mailcatcher:
+        image: schickling/mailcatcher
+        ports:
+            - "1080:1080"
+            - "1025:1025"
+        networks:
+            - backend
