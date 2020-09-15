@@ -42,6 +42,7 @@ services:
             MYSQL_PASSWORD: secret
         volumes:
             - mysql-database:/var/lib/mysql
+            - ./develop/mycustom.cnf:/etc/mysql/conf.d/custom.cnf
         ports:
             - 13306:3306
         networks:
